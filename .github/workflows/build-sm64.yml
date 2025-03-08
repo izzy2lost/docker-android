@@ -10,8 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout Repository
