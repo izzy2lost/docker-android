@@ -1,4 +1,4 @@
-name: Build APK with Headless Emulator
+name: Build APK with Emulator
 
 on:
   push:
