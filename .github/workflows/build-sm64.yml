@@ -30,7 +30,7 @@ jobs:
         adb shell "cd /data/data/com.termux/files/home && ./myscript.sh"
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: sm64coopdx-${{ matrix.arch }}
         path: sm64coopdx-${{ matrix.arch }}.apk
