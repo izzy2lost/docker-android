@@ -18,9 +18,7 @@ jobs:
         
       - name: Install Nix and Devenv
         uses: cachix/install-nix-action@v26
-        with:
-          nix_version: '2.26.3'  # Optional: specify a Nix version if needed
-          
+        
       - name: Install Devenv
         run: |
           nix profile install nixpkgs#devenv
