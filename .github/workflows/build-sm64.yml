@@ -11,7 +11,7 @@ jobs:
         arch: [armv7, arm64]
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4.2
+      uses: actions/checkout@v4
 
     - name: Start Android emulator
       uses: docker://budtmo/docker-android:emulator_11.0
