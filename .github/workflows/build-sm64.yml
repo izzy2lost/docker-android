@@ -12,14 +12,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
+        
       - name: Set Up Nix and Devenv
         run: |
-          # Install Nix
-          curl -L https://nixos.org/nix/install | sh
+          # Install Nix as a daemon
+          sh <(curl -L https://nixos.org/nix/install) --daemon
           
-          # Source Nix environment to make nix-env available
-          . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
+          # Source the correct profile
+          . /home/runner/.nix-profile/etc/profile.d/nix.sh
           
           # Install Devenv
           nix-env -iA nixpkgs.devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
