@@ -29,6 +29,7 @@ jobs:
           
           # Ensure config directory exists
           mkdir -p .config/devenv/
+          chmod -R 755 /root/.config/devenv/
           
           # Copy devenv configuration files
           cp devenv.nix /root/.config/devenv/
