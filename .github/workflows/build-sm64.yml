@@ -13,22 +13,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Nix
+      - name: Set Up Nix and Devenv
         run: |
-          sh <(curl -L https://nixos.org/nix/install) --daemon
-          echo "Nix installed successfully"
+          # Install Nix
+          curl -L https://nixos.org/nix/install | sh
           
-      - name: Set Up Devenv
-        run: |
+          # Source Nix environment to make nix-env available
           . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
+          
+          # Install Devenv
           nix-env -iA nixpkgs.devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
+          
+          # Ensure config directory exists
           mkdir -p /root/.config/devenv/
+          
+          # Copy devenv configuration files
           cp devenv.nix /root/.config/devenv/
           cp devenv.yaml /root/.config/devenv/
+          
+          # Start the Devenv environment
           devenv up
-        env:
-          NIX_PATH: nixpkgs=/nix/var/nix/profiles/default/etc/profile.d/nix.sh
-
+          
+        shell: bash
+        
       - name: Install Android Emulator (AArch64 & ARMv7)
         run: |
           sdkmanager --install "system-images;android-32;google_apis;arm64-v8a"
