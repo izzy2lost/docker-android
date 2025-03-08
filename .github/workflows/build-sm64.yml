@@ -25,7 +25,7 @@ jobs:
           export PATH="$NIX_LINK/bin:/nix/var/nix/profiles/default/bin:$PATH"
                 
           # Install Devenv
-          nix-env -iA nixpkgs.devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
+          nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
           
           # Ensure config directory exists
           mkdir -p /root/.config/devenv/
