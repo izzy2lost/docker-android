@@ -23,10 +23,7 @@ jobs:
           export NIX_PROFILES="/nix/var/nix/profiles/default:$NIX_LINK"
           export XDG_DATA_DIRS="/usr/local/share:/usr/share:$NIX_LINK/share:/nix/var/nix/profiles/default/share"
           export PATH="$NIX_LINK/bin:/nix/var/nix/profiles/default/bin:$PATH"
-          
-          # Source nix.sh to update the environment
-          . /home/runner/.nix-profile/etc/profile.d/nix.sh
-          
+                
           # Install Devenv
           nix-env -iA nixpkgs.devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
           
