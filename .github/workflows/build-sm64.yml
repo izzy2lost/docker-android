@@ -17,8 +17,6 @@ jobs:
       - name: Install Nix and Devenv
         uses: cachix/install-nix-action@v26       
 
-      - uses: cachix/install-nix-action@v26
-      
       - uses: cachix/cachix-action@v14
         with:
           name: devenv
