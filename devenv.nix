@@ -3,9 +3,9 @@
 {
   android = {
     enable = true;
-    platforms.version = [ "32" "34" ];
+    platforms.version = [ "28" "24" ]; # Use 28 for arm64 and 24 for armv7
     systemImageTypes = [ "google_apis_playstore" ];
-    abis = [ "arm64-v8a" "x86_64" ];
+    abis = [ "arm64-v8a" "armeabi-v7a" ];  # Set armv7 ABI for API level 24
     cmake.version = [ "3.22.1" ];
     cmdLineTools.version = "11.0";
     tools.version = "26.1.1";
