@@ -1,4 +1,4 @@
-name: Android Build with Termux (ARMv7 & AArch64)
+name: Android Build with Termux
 
 on:
   push:
