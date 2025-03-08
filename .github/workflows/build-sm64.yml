@@ -8,9 +8,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -60,7 +58,8 @@ jobs:
           adb push myscript.sh /data/data/com.termux/files/home/myscript.sh
           adb shell chmod +x /data/data/com.termux/files/home/myscript.sh
           adb shell /data/data/com.termux/files/home/myscript.sh aarch64
-          echo "Build for AArch64 completed successfully"
+          adb shell mv /data/data/com.termux/files/home/build/us_pc/sm64coopdx.apk /data/data/com.termux/files/home/build/us_pc/sm64coopdx-aarch64.apk
+          echo "Build for AArch64 completed and APK renamed"
 
       - name: Start Android Emulator (ARMv7)
         run: |
@@ -73,13 +72,18 @@ jobs:
           adb push myscript.sh /data/data/com.termux/files/home/myscript.sh
           adb shell chmod +x /data/data/com.termux/files/home/myscript.sh
           adb shell /data/data/com.termux/files/home/myscript.sh armv7
-          echo "Build for ARMv7 completed successfully"
+          adb shell mv /data/data/com.termux/files/home/build/us_pc/sm64coopdx.apk /data/data/com.termux/files/home/build/us_pc/sm64coopdx-armv7.apk
+          echo "Build for ARMv7 completed and APK renamed"
 
-      - name: Retrieve Built APKs
+      - name: Retrieve Built APK for ARMv7
         run: |
           adb pull /data/data/com.termux/files/home/build/us_pc/sm64coopdx-armv7.apk ./sm64coopdx-armv7.apk
+          echo "ARMv7 APK pulled successfully"
+
+      - name: Retrieve Built APK for AArch64
+        run: |
           adb pull /data/data/com.termux/files/home/build/us_pc/sm64coopdx-aarch64.apk ./sm64coopdx-aarch64.apk
-          echo "APKs pulled successfully"
+          echo "AArch64 APK pulled successfully"
 
       - name: Upload Built APKs
         uses: actions/upload-artifact@v4
