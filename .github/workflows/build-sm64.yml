@@ -1,0 +1,55 @@
+name: Build and Upload sm64coopdx APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [armv7, arm64]  # Build for both architectures
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Start Android emulator
+      uses: docker://budtmo/docker-android:emulator_30_google_apis_x86_64
+      with:
+        args: >
+          -e ANDROID_DEVICE="Nexus 5"
+          -e EMULATOR_ARGS="-no-window -no-audio -no-boot-anim -writable-system"
+          -e ARCH=${{ matrix.arch }}
+          -v ${{ github.workspace }}:/root/workspace
+
+    - name: Wait for emulator
+      run: |
+        adb wait-for-device
+        while [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" != "1" ]; do
+          sleep 5
+        done
+
+    - name: Install Termux
+      run: |
+        curl -L -o termux.apk "https://f-droid.org/repo/com.termux_$(curl -s https://api.github.com/repos/termux/termux-app/releases/latest | grep -oP '"tag_name": "\K[^"]+').apk"
+        adb install termux.apk
+
+    - name: Push and run build script
+      run: |
+        # Push your build script
+        adb push myscript.sh /data/data/com.termux/files/home/
+
+        # Make script executable and run it
+        adb shell "chmod +x /data/data/com.termux/files/home/myscript.sh"
+        adb shell "cd /data/data/com.termux/files/home && ./myscript.sh"
+
+    - name: Pull APK from emulator
+      run: |
+        # Pull the built APK
+        adb pull /data/data/com.termux/files/home/build/us_pc/sm64coopdx.apk sm64coopdx-${{ matrix.arch }}.apk
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: sm64coopdx-${{ matrix.arch }}
+        path: sm64coopdx-${{ matrix.arch }}.apk
