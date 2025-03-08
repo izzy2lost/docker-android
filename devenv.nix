@@ -35,4 +35,10 @@
       package = pkgs.android-studio;
     };
   };
+
+  packages = [ pkgs.hello ];
+
+  scripts.say-bye.exec = ''
+    echo bye
+  '';
 }
