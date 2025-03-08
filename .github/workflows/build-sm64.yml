@@ -1,41 +1,77 @@
-name: Build APK with Emulator
+name: Android Build with Termux (ARMv7 & AArch64)
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [armv7, arm64]
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Start Android emulator
-      uses: docker://budtmo/docker-android:emulator_11.0
-      with:
-        args: >
-          -e EMULATOR_DEVICE="Nexus 5"  # Use a simpler device
-          -e EMULATOR_ARGS="-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -partition-size 2048"
-          -e WEB_VNC=false  # Disable web/VNC
-          -e ARCH=${{ matrix.arch }}
-          -v ${{ github.workspace }}:/root/workspace
+      - name: Set Up Devenv
+        run: |
+          curl -L https://nixos.org/nix/install | sh
+          nix-env -iA nixpkgs.devenv
+          cp devenv.nix /root/.config/devenv/ # Copy devenv.nix to the expected location
+          cp devenv.yaml /root/.config/devenv/ # Copy devenv.yaml to the expected location
+          devenv up
 
-    - name: Install Termux and build APK
-      run: |
-        # Wait for emulator to fully boot
-        adb wait-for-device
-        while [[ -z $(adb shell getprop sys.boot_completed) ]]; do sleep 5; done
+      - name: Install Android Emulator (AArch64 & ARMv7)
+        run: |
+          sdkmanager --install "system-images;android-32;google_apis;arm64-v8a"
+          sdkmanager --install "system-images;android-25;default;armeabi-v7a"
+          
+          avdmanager create avd --force --name my-android-emulator-aarch64 --package "system-images;android-32;google_apis;arm64-v8a"
+          avdmanager create avd --force --name my-android-emulator-armv7 --package "system-images;android-25;default;armeabi-v7a"
+          echo "Android emulators set up successfully"
 
-        # Install Termux and run script
-        adb install termux.apk
-        adb push myscript.sh /data/data/com.termux/files/home/
-        adb shell "cd /data/data/com.termux/files/home && ./myscript.sh"
+      - name: Start Android Emulator (AArch64)
+        run: |
+          emulator -avd my-android-emulator-aarch64 -no-window -no-audio -no-boot-anim -no-snapshot -accel on -gpu swiftshader_indirect &
+          adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+          echo "AArch64 emulator started successfully"
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: sm64coopdx-${{ matrix.arch }}
-        path: sm64coopdx-${{ matrix.arch }}.apk
+      - name: Download and Install Termux
+        run: |
+          wget -O termux.apk https://f-droid.org/repo/com.termux_118.apk
+          adb install termux.apk
+          echo "Termux installed successfully"
+
+      - name: Push and Execute Build Script in Termux (AArch64)
+        run: |
+          adb push myscript.sh /data/data/com.termux/files/home/myscript.sh
+          adb shell chmod +x /data/data/com.termux/files/home/myscript.sh
+          adb shell /data/data/com.termux/files/home/myscript.sh aarch64
+          echo "Build for AArch64 completed successfully"
+
+      - name: Start Android Emulator (ARMv7)
+        run: |
+          emulator -avd my-android-emulator-armv7 -no-window -no-audio -no-boot-anim -no-snapshot -accel on -gpu swiftshader_indirect &
+          adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+          echo "ARMv7 emulator started successfully"
+
+      - name: Push and Execute Build Script in Termux (ARMv7)
+        run: |
+          adb push myscript.sh /data/data/com.termux/files/home/myscript.sh
+          adb shell chmod +x /data/data/com.termux/files/home/myscript.sh
+          adb shell /data/data/com.termux/files/home/myscript.sh armv7
+          echo "Build for ARMv7 completed successfully"
+
+      - name: Retrieve Built APKs
+        run: |
+          adb pull /data/data/com.termux/files/home/build/us_pc/sm64coopdx-armv7.apk ./sm64coopdx-armv7.apk
+          adb pull /data/data/com.termux/files/home/build/us_pc/sm64coopdx-aarch64.apk ./sm64coopdx-aarch64.apk
+          echo "APKs pulled successfully"
+
+      - name: Upload Built APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sm64coopdx-apks
+          path: |
+            ./sm64coopdx-armv7.apk
+            ./sm64coopdx-aarch64.apk
