@@ -33,7 +33,6 @@ jobs:
           
           # Start the Devenv environment
           devenv up
-          
         shell: bash
         
       - name: Install Android Emulator (AArch64 & ARMv7)
