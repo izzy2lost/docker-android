@@ -28,7 +28,7 @@ jobs:
           nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
           
           # Ensure config directory exists
-          mkdir -p /.config/devenv/
+          mkdir -p .config/devenv/
           
           # Copy devenv configuration files
           cp devenv.nix /root/.config/devenv/
