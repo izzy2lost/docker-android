@@ -1,4 +1,4 @@
-name: Build APK with Valid Docker Tag
+name: Build APK with Headless Emulator
 
 on:
   push:
@@ -9,32 +9,33 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [armv7, arm64]  # armv7 uses Houdini; arm64 uses native emulator
+        arch: [armv7, arm64]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Start Android emulator
-      uses: docker://budtmo/docker-android:emulator_13.0  
+      uses: docker://budtmo/docker-android:emulator_11.0
       with:
         args: >
-          -e EMULATOR_DEVICE="Samsung Galaxy S10"  # Device from README example
-          -e EMULATOR_ARGS="-no-window -no-audio -no-boot-anim"
+          -e EMULATOR_DEVICE="Nexus 5"  # Use a simpler device
+          -e EMULATOR_ARGS="-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -partition-size 2048"
+          -e WEB_VNC=false  # Disable web/VNC
           -e ARCH=${{ matrix.arch }}
           -v ${{ github.workspace }}:/root/workspace
 
     - name: Install Termux and build APK
       run: |
-        # Install Termux
-        curl -L -o termux.apk "https://f-droid.org/repo/com.termux_$(curl -s https://api.github.com/repos/termux/termux-app/releases/latest | grep -oP '"tag_name": "\K[^"]+').apk"
-        adb install termux.apk
+        # Wait for emulator to fully boot
+        adb wait-for-device
+        while [[ -z $(adb shell getprop sys.boot_completed) ]]; do sleep 5; done
 
-        # Run your build script
+        # Install Termux and run script
+        adb install termux.apk
         adb push myscript.sh /data/data/com.termux/files/home/
-        adb shell "chmod +x /data/data/com.termux/files/home/myscript.sh"
         adb shell "cd /data/data/com.termux/files/home && ./myscript.sh"
 
-    - name: Upload APK artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: sm64coopdx-${{ matrix.arch }}
