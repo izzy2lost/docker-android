@@ -17,11 +17,6 @@ jobs:
         run: |
           sh <(curl -L https://nixos.org/nix/install) --daemon
           echo "Nix installed successfully"
-
-      - name: Verify Nix Installation
-        run: |
-          source /nix/var/nix/profiles/default/etc/profile.d/nix.sh
-          nix-shell -p nix-info --run "nix-info -m"
           
       - name: Set Up Devenv
         run: |
